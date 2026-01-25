@@ -1,0 +1,386 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Login - Cue Stories</title>
+  <link rel="stylesheet" href="../styles/main.css">
+  <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet">
+  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+  <style>
+    body {
+      background: linear-gradient(135deg, #1a1a1a 0%, #2d2d2d 100%);
+      color: #fff;
+      min-height: 100vh;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+    }
+
+    .auth-container {
+      width: 100%;
+      max-width: 450px;
+      padding: 20px;
+    }
+
+    .auth-card {
+      background-color: #2d2d2d;
+      border: 2px solid #ffc107;
+      border-radius: 15px;
+      padding: 40px;
+      box-shadow: 0 8px 32px rgba(255, 193, 7, 0.1);
+    }
+
+    .auth-logo {
+      text-align: center;
+      margin-bottom: 30px;
+    }
+
+    .auth-logo h1 {
+      color: #ffc107;
+      font-weight: 900;
+      font-size: 2rem;
+      margin-bottom: 5px;
+    }
+
+    .auth-logo p {
+      color: #a0a0a0;
+      font-size: 0.9rem;
+    }
+
+    .tab-nav {
+      display: flex;
+      gap: 0;
+      margin-bottom: 25px;
+      border-bottom: 2px solid #444;
+    }
+
+    .tab-btn {
+      flex: 1;
+      padding: 15px;
+      background: none;
+      border: none;
+      color: #a0a0a0;
+      cursor: pointer;
+      font-weight: 600;
+      transition: all 0.3s ease;
+      border-bottom: 3px solid transparent;
+      margin-bottom: -2px;
+    }
+
+    .tab-btn.active {
+      color: #ffc107;
+      border-bottom-color: #ffc107;
+    }
+
+    .form-group {
+      margin-bottom: 20px;
+    }
+
+    .form-group label {
+      color: #ddd;
+      font-weight: 600;
+      margin-bottom: 8px;
+      display: block;
+    }
+
+    .form-control {
+      background-color: #1a1a1a;
+      border: 1px solid #444;
+      color: #fff;
+      padding: 12px 15px;
+      border-radius: 8px;
+      font-size: 1rem;
+    }
+
+    .form-control:focus {
+      background-color: #1a1a1a;
+      border-color: #ffc107;
+      color: #fff;
+      box-shadow: 0 0 0 0.2rem rgba(255, 193, 7, 0.25);
+    }
+
+    .form-control::placeholder {
+      color: #666;
+    }
+
+    .btn-login {
+      width: 100%;
+      padding: 12px;
+      background: linear-gradient(135deg, #ffc107, #ffb300);
+      border: none;
+      border-radius: 8px;
+      color: #000;
+      font-weight: 700;
+      cursor: pointer;
+      transition: all 0.3s ease;
+      margin-top: 10px;
+    }
+
+    .btn-login:hover {
+      transform: translateY(-2px);
+      box-shadow: 0 8px 20px rgba(255, 193, 7, 0.3);
+    }
+
+    .btn-login:disabled {
+      opacity: 0.6;
+      cursor: not-allowed;
+    }
+
+    .alert {
+      margin-bottom: 20px;
+      border-radius: 8px;
+    }
+
+    .back-link {
+      text-align: center;
+      margin-top: 20px;
+    }
+
+    .back-link a {
+      color: #ffc107;
+      text-decoration: none;
+      font-weight: 600;
+    }
+
+    .back-link a:hover {
+      text-decoration: underline;
+    }
+
+    .password-toggle {
+      cursor: pointer;
+      color: #ffc107;
+    }
+
+    .input-group {
+      position: relative;
+    }
+
+    .input-group .password-toggle {
+      position: absolute;
+      right: 15px;
+      top: 50%;
+      transform: translateY(-50%);
+    }
+
+    .loading-spinner {
+      display: none;
+      text-align: center;
+      margin-top: 20px;
+    }
+
+    .loading-spinner.show {
+      display: block;
+    }
+
+    .tab-content {
+      display: none;
+    }
+
+    .tab-content.active {
+      display: block;
+    }
+  </style>
+</head>
+<body>
+  <div class="auth-container">
+    <div class="auth-card">
+      <div class="auth-logo">
+        <h1>🎱 Cue Stories</h1>
+        <p>Book Your Shots</p>
+      </div>
+
+      <div id="alertContainer"></div>
+
+      <div class="tab-nav">
+        <button class="tab-btn active" data-tab="login" onclick="switchTab('login')">
+          <i class="fas fa-sign-in-alt"></i> Login
+        </button>
+        <button class="tab-btn" data-tab="signup" onclick="switchTab('signup')">
+          <i class="fas fa-user-plus"></i> Sign Up
+        </button>
+      </div>
+
+      <!-- LOGIN TAB -->
+      <div id="login-tab" class="tab-content active">
+        <form id="loginForm" onsubmit="handleLogin(event)">
+          <div class="form-group">
+            <label for="loginEmail">Email</label>
+            <input type="email" class="form-control" id="loginEmail" required placeholder="your@email.com">
+          </div>
+
+          <div class="form-group">
+            <label for="loginPassword">Password</label>
+            <input type="password" class="form-control" id="loginPassword" required placeholder="Enter password">
+          </div>
+
+          <button type="submit" class="btn-login" id="loginBtn">
+            <i class="fas fa-sign-in-alt"></i> Login
+          </button>
+        </form>
+        <div class="loading-spinner" id="loginSpinner">
+          <div class="spinner-border text-warning" role="status">
+            <span class="visually-hidden">Loading...</span>
+          </div>
+        </div>
+      </div>
+
+      <!-- SIGNUP TAB -->
+      <div id="signup-tab" class="tab-content">
+        <form id="signupForm" onsubmit="handleSignup(event)">
+          <div class="form-group">
+            <label for="signupName">Full Name</label>
+            <input type="text" class="form-control" id="signupName" required placeholder="John Doe">
+          </div>
+
+          <div class="form-group">
+            <label for="signupEmail">Email</label>
+            <input type="email" class="form-control" id="signupEmail" required placeholder="your@email.com">
+          </div>
+
+          <div class="form-group">
+            <label for="signupPhone">Phone Number</label>
+            <input type="tel" class="form-control" id="signupPhone" required placeholder="8408068388">
+          </div>
+
+          <div class="form-group">
+            <label for="signupPassword">Password</label>
+            <input type="password" class="form-control" id="signupPassword" required placeholder="Min 6 characters">
+          </div>
+
+          <button type="submit" class="btn-login" id="signupBtn">
+            <i class="fas fa-user-plus"></i> Create Account
+          </button>
+        </form>
+        <div class="loading-spinner" id="signupSpinner">
+          <div class="spinner-border text-warning" role="status">
+            <span class="visually-hidden">Loading...</span>
+          </div>
+        </div>
+      </div>
+
+      <div class="back-link">
+        <a href="../index.html"><i class="fas fa-arrow-left"></i> Back to Home</a>
+      </div>
+    </div>
+  </div>
+
+  <script src="../js/auth.js"></script>
+  <script>
+    function switchTab(tab) {
+      console.log('[v0] Switching to tab:', tab);
+
+      // Hide all tabs
+      document.querySelectorAll('.tab-content').forEach(el => {
+        el.classList.remove('active');
+      });
+      document.querySelectorAll('.tab-btn').forEach(el => {
+        el.classList.remove('active');
+      });
+
+      // Show selected tab
+      document.getElementById(`${tab}-tab`).classList.add('active');
+      document.querySelector(`[data-tab="${tab}"]`).classList.add('active');
+    }
+
+    function showAlert(message, type) {
+      const alertContainer = document.getElementById('alertContainer');
+      const alertDiv = document.createElement('div');
+      alertDiv.className = `alert alert-${type} alert-dismissible fade show`;
+      alertDiv.innerHTML = `
+        ${message}
+        <button type="button" class="btn-close" data-bs-dismiss="alert"></button>
+      `;
+      alertContainer.innerHTML = '';
+      alertContainer.appendChild(alertDiv);
+
+      setTimeout(() => {
+        alertDiv.remove();
+      }, 5000);
+    }
+
+    async function handleLogin(event) {
+      event.preventDefault();
+      console.log('[v0] Login form submitted');
+
+      const email = document.getElementById('loginEmail').value;
+      const password = document.getElementById('loginPassword').value;
+
+      const loginBtn = document.getElementById('loginBtn');
+      const loginSpinner = document.getElementById('loginSpinner');
+
+      loginBtn.disabled = true;
+      loginSpinner.classList.add('show');
+
+      try {
+        const result = await authManager.login(email, password);
+
+        if (result.success) {
+          console.log('[v0] Login successful');
+          showAlert('Login successful! Redirecting...', 'success');
+          setTimeout(() => {
+            window.location.href = '/index.html';
+          }, 1500);
+        } else {
+          console.error('[v0] Login failed:', result.error);
+          showAlert(`Login failed: ${result.error}`, 'danger');
+        }
+      } catch (error) {
+        console.error('[v0] Login error:', error);
+        showAlert(`Error: ${error.message}`, 'danger');
+      } finally {
+        loginBtn.disabled = false;
+        loginSpinner.classList.remove('show');
+      }
+    }
+
+    async function handleSignup(event) {
+      event.preventDefault();
+      console.log('[v0] Signup form submitted');
+
+      const name = document.getElementById('signupName').value;
+      const email = document.getElementById('signupEmail').value;
+      const phone = document.getElementById('signupPhone').value;
+      const password = document.getElementById('signupPassword').value;
+
+      if (password.length < 6) {
+        showAlert('Password must be at least 6 characters', 'danger');
+        return;
+      }
+
+      const signupBtn = document.getElementById('signupBtn');
+      const signupSpinner = document.getElementById('signupSpinner');
+
+      signupBtn.disabled = true;
+      signupSpinner.classList.add('show');
+
+      try {
+        const result = await authManager.signup(email, phone, name, password);
+
+        if (result.success) {
+          console.log('[v0] Signup successful');
+          showAlert('Account created! Redirecting...', 'success');
+          setTimeout(() => {
+            window.location.href = '/index.html';
+          }, 1500);
+        } else {
+          console.error('[v0] Signup failed:', result.error);
+          showAlert(`Signup failed: ${result.error}`, 'danger');
+        }
+      } catch (error) {
+        console.error('[v0] Signup error:', error);
+        showAlert(`Error: ${error.message}`, 'danger');
+      } finally {
+        signupBtn.disabled = false;
+        signupSpinner.classList.remove('show');
+      }
+    }
+
+    // Check if already logged in
+    if (authManager.isLoggedIn()) {
+      console.log('[v0] User already logged in, redirecting to home');
+      window.location.href = '/index.html';
+    }
+  </script>
+</body>
+</html>

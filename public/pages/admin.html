@@ -1,0 +1,1075 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Admin Dashboard - Cue Stories</title>
+  <link rel="stylesheet" href="../styles/main.css">
+  <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet">
+  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+  <style>
+    .sidebar {
+      background-color: #1a1a1a;
+      border-right: 2px solid #ffc107;
+      min-height: 100vh;
+      position: sticky;
+      top: 0;
+      width: 100%;
+      max-width: 260px;
+    }
+    .sidebar-item {
+      padding: 12px 20px;
+      border-left: 3px solid transparent;
+      cursor: pointer;
+      transition: all 0.3s ease;
+      color: #a0a0a0;
+    }
+    .sidebar-item:hover {
+      background-color: #2d2d2d;
+      border-left-color: #ffc107;
+    }
+    .sidebar-item.active {
+      background-color: rgba(255, 193, 7, 0.1);
+      border-left-color: #ffc107;
+      color: #ffc107;
+    }
+    .dashboard-content {
+      display: none;
+    }
+    .dashboard-content.active {
+      display: block;
+    }
+
+    @media (max-width: 991.98px) {
+      .sidebar {
+        min-height: unset;
+        border-right: none;
+        max-width: 100vw;
+      }
+      .offcanvas-lg {
+        width: 80vw !important;
+        max-width: 320px;
+      }
+      .p-4.pt-lg-4 {
+        padding-top: 1rem !important;
+      }
+      .col-12.col-lg.p-4 {
+        padding: 1rem !important;
+      }
+    }
+
+    @media (max-width: 575.98px) {
+      .stat-card {
+        font-size: 0.95rem;
+        padding: 10px;
+      }
+      .dashboard-content {
+        padding: 0 !important;
+      }
+      .col-12.col-lg.p-4 {
+        padding: 0.5rem !important;
+      }
+    }
+    .stat-card {
+      background: linear-gradient(135deg, #2d2d2d 0%, rgba(255, 193, 7, 0.1) 100%);
+      border: 2px solid #ffc107;
+      border-radius: 12px;
+      padding: 20px;
+      text-align: center;
+    }
+    .stat-value {
+      font-size: 2.5rem;
+      font-weight: bold;
+      color: #ffc107;
+      margin: 10px 0;
+    }
+    .stat-label {
+      color: #a0a0a0;
+      font-size: 0.9rem;
+    }
+    .table-wrapper {
+      overflow-x: auto;
+    }
+    .admin-table {
+      color: #fff;
+    }
+    .admin-table thead {
+      background-color: #1a1a1a;
+      border-bottom: 2px solid #ffc107;
+    }
+    .admin-table tbody tr {
+      border-bottom: 1px solid #444;
+    }
+    .admin-table tbody tr:hover {
+      background-color: rgba(255, 193, 7, 0.05);
+    }
+    .status-badge {
+      padding: 5px 10px;
+      border-radius: 20px;
+      font-size: 0.85rem;
+      font-weight: 600;
+    }
+    .status-confirmed {
+      background-color: rgba(76, 175, 80, 0.2);
+      color: #4CAF50;
+    }
+    .status-pending {
+      background-color: rgba(255, 193, 7, 0.2);
+      color: #ffc107;
+    }
+    .status-cancelled {
+      background-color: rgba(244, 67, 54, 0.2);
+      color: #f44336;
+    }
+    .form-section {
+      background-color: #2d2d2d;
+      border: 2px solid #444;
+      border-radius: 12px;
+      padding: 20px;
+      margin-bottom: 20px;
+    }
+    .action-btn {
+      padding: 6px 12px;
+      font-size: 0.85rem;
+      margin-right: 5px;
+    }
+  </style>
+</head>
+<body class="bg-dark text-white">
+  <!-- Top Navbar for mobile -->
+  <nav class="navbar navbar-dark bg-dark d-lg-none sticky-top px-2" style="border-bottom: 2px solid #ffc107;">
+    <button class="navbar-toggler" type="button" data-bs-toggle="offcanvas" data-bs-target="#adminSidebar" aria-controls="adminSidebar" aria-label="Toggle navigation">
+      <span class="navbar-toggler-icon"></span>
+    </button>
+    <span class="navbar-brand mb-0 h1 text-warning">Admin Panel</span>
+  </nav>
+
+  <div class="container-fluid">
+    <div class="row g-0" style="min-height: 100vh;">
+      <!-- Sidebar (offcanvas for mobile, static for desktop) -->
+      <div class="offcanvas-lg offcanvas-start bg-dark text-white" tabindex="-1" id="adminSidebar" aria-labelledby="adminSidebarLabel" style="width:260px; border-right:2px solid #ffc107;">
+        <div class="offcanvas-header d-lg-none">
+          <h5 class="offcanvas-title text-warning" id="adminSidebarLabel"><i class="fas fa-crown me-2"></i> Admin Panel</h5>
+          <button type="button" class="btn-close btn-close-white" data-bs-dismiss="offcanvas" aria-label="Close"></button>
+        </div>
+        <div class="sidebar p-4 pt-lg-4">
+          <div class="mb-4 d-none d-lg-block">
+            <h4 class="text-warning"><i class="fas fa-crown me-2"></i> Admin Panel</h4>
+            <p class="text-muted small">Cue Stories Owner</p>
+          </div>
+          <nav class="nav flex-column gap-2">
+            <div class="sidebar-item active" onclick="switchSection('dashboard')" data-bs-dismiss="offcanvas">
+              <i class="fas fa-chart-line me-2"></i> Dashboard
+            </div>
+            <div class="sidebar-item" onclick="switchSection('bookings')" data-bs-dismiss="offcanvas">
+              <i class="fas fa-calendar-check me-2"></i> Bookings
+            </div>
+            <div class="sidebar-item" onclick="switchSection('slots')" data-bs-dismiss="offcanvas">
+              <i class="fas fa-clock me-2"></i> Time Slots
+            </div>
+            <div class="sidebar-item" onclick="switchSection('pricing')" data-bs-dismiss="offcanvas">
+              <i class="fas fa-tag me-2"></i> Pricing
+            </div>
+            <div class="sidebar-item" onclick="switchSection('customers')" data-bs-dismiss="offcanvas">
+              <i class="fas fa-users me-2"></i> Customers
+            </div>
+            <div class="sidebar-item" onclick="switchSection('revenue')" data-bs-dismiss="offcanvas">
+              <i class="fas fa-money-bill me-2"></i> Revenue
+            </div>
+            <div class="sidebar-item" onclick="switchSection('settings')" data-bs-dismiss="offcanvas">
+              <i class="fas fa-cog me-2"></i> Settings
+            </div>
+            <hr class="border-warning">
+            <div class="sidebar-item" onclick="adminLogout()" data-bs-dismiss="offcanvas">
+              <i class="fas fa-sign-out-alt me-2"></i> Logout
+            </div>
+          </nav>
+        </div>
+      </div>
+
+      <!-- Main Content -->
+      <div class="col-12 col-lg p-4" style="min-width:0;">
+        <!-- Dashboard Section -->
+        <div class="dashboard-content active" id="dashboard">
+          <h2 class="text-warning mb-4">
+            <i class="fas fa-chart-line me-2"></i> Dashboard Overview
+          </h2>
+
+          <!-- Stats -->
+          <div class="row g-3 mb-5">
+            <div class="col-md-3">
+              <div class="stat-card">
+                <i class="fas fa-calendar-check fa-2x text-warning"></i>
+                <div class="stat-label">Today's Bookings</div>
+                <div class="stat-value" id="todayBookings">0</div>
+              </div>
+            </div>
+            <div class="col-md-3">
+              <div class="stat-card">
+                <i class="fas fa-users fa-2x text-warning"></i>
+                <div class="stat-label">Total Users</div>
+                <div class="stat-value" id="totalUsers">0</div>
+              </div>
+            </div>
+            <div class="col-md-3">
+              <div class="stat-card">
+                <i class="fas fa-rupiah fa-2x text-warning"></i>
+                <div class="stat-label">Today's Revenue</div>
+                <div class="stat-value" id="todayRevenue">₹0</div>
+              </div>
+            </div>
+            <div class="col-md-3">
+              <div class="stat-card">
+                <i class="fas fa-chart-pie fa-2x text-warning"></i>
+                <div class="stat-label">Occupancy</div>
+                <div class="stat-value" id="occupancy">0%</div>
+              </div>
+            </div>
+          </div>
+
+          <!-- Recent Bookings -->
+          <div class="card bg-dark border-warning mb-4">
+            <div class="card-header bg-black border-warning">
+              <h5 class="text-warning mb-0">
+                <i class="fas fa-calendar-alt me-2"></i> Recent Bookings
+              </h5>
+            </div>
+            <div class="card-body">
+              <div class="table-wrapper">
+                <table class="table admin-table">
+                  <thead>
+                    <tr>
+                      <th>Booking ID</th>
+                      <th>Customer</th>
+                      <th>Game</th>
+                      <th>Date & Time</th>
+                      <th>Amount</th>
+                      <th>Status</th>
+                    </tr>
+                  </thead>
+                  <tbody id="recentBookingsTable">
+                    <tr><td colspan="6" class="text-center text-muted">Loading...</td></tr>
+                  </tbody>
+                </table>
+              </div>
+            </div>
+          </div>
+        </div>
+
+        <!-- Bookings Section -->
+        <div class="dashboard-content" id="bookings">
+          <h2 class="text-warning mb-4">
+            <i class="fas fa-calendar-check me-2"></i> Manage Bookings
+          </h2>
+
+          <div class="card bg-dark border-warning mb-4">
+            <div class="card-header bg-black border-warning">
+              <div class="d-flex justify-content-between align-items-center">
+                <h5 class="text-warning mb-0">All Bookings</h5>
+                <input type="date" class="form-control bg-dark border-warning text-white" id="bookingFilter" style="max-width: 150px;" onchange="filterBookings()">
+              </div>
+            </div>
+            <div class="card-body">
+              <div class="table-wrapper">
+                <table class="table admin-table">
+                  <thead>
+                    <tr>
+                      <th>ID</th>
+                      <th>Customer</th>
+                      <th>Game</th>
+                      <th>Date</th>
+                      <th>Time</th>
+                      <th>Amount</th>
+                      <th>Status</th>
+                      <th>Actions</th>
+                    </tr>
+                  </thead>
+                  <tbody id="bookingsTable">
+                    <tr><td colspan="8" class="text-center text-muted">Loading...</td></tr>
+                  </tbody>
+                </table>
+              </div>
+            </div>
+          </div>
+        </div>
+
+        <!-- Time Slots Section -->
+        <div class="dashboard-content" id="slots">
+          <h2 class="text-warning mb-4">
+            <i class="fas fa-clock me-2"></i> Manage Time Slots
+          </h2>
+
+          <div class="form-section">
+            <h5 class="text-warning mb-4">Block Time Slot</h5>
+            <div class="row g-3">
+              <div class="col-md-4">
+                <label class="form-label text-warning">Date</label>
+                <input type="date" class="form-control bg-dark border-warning text-white" id="blockDate">
+              </div>
+              <div class="col-md-3">
+                <label class="form-label text-warning">Start Time</label>
+                <input type="time" class="form-control bg-dark border-warning text-white" id="blockStartTime">
+              </div>
+              <div class="col-md-3">
+                <label class="form-label text-warning">End Time</label>
+                <input type="time" class="form-control bg-dark border-warning text-white" id="blockEndTime">
+              </div>
+              <div class="col-md-2 d-flex align-items-end">
+                <button class="btn btn-warning w-100" onclick="blockSlot()">
+                  <i class="fas fa-lock me-2"></i> Block
+                </button>
+              </div>
+            </div>
+          </div>
+
+          <div class="card bg-dark border-warning">
+            <div class="card-header bg-black border-warning">
+              <h5 class="text-warning mb-0">Blocked Slots</h5>
+            </div>
+            <div class="card-body">
+              <div class="table-wrapper">
+                <table class="table admin-table">
+                  <thead>
+                    <tr>
+                      <th>Date</th>
+                      <th>Time Slot</th>
+                      <th>Reason</th>
+                      <th>Actions</th>
+                    </tr>
+                  </thead>
+                  <tbody id="blockedSlotsTable">
+                    <tr><td colspan="4" class="text-center text-muted">Loading...</td></tr>
+                  </tbody>
+                </table>
+              </div>
+            </div>
+          </div>
+        </div>
+
+        <!-- Pricing Section -->
+        <div class="dashboard-content" id="pricing">
+          <h2 class="text-warning mb-4">
+            <i class="fas fa-tag me-2"></i> Manage Pricing
+          </h2>
+
+          <div class="row g-4">
+            <div class="col-lg-6">
+              <div class="form-section">
+                <h5 class="text-warning mb-4">Snooker</h5>
+                <div class="mb-3">
+                  <label class="form-label text-warning">Hourly Rate (₹)</label>
+                  <input type="number" class="form-control bg-dark border-warning text-white" id="snookerPrice" value="150">
+                </div>
+                <div class="mb-3">
+                  <label class="form-label text-warning">First Booking Discount (₹)</label>
+                  <input type="number" class="form-control bg-dark border-warning text-white" id="snookerDiscount" value="25">
+                </div>
+                <button class="btn btn-warning w-100" onclick="updatePricing('snooker')">
+                  Update Snooker Pricing
+                </button>
+              </div>
+            </div>
+
+            <div class="col-lg-6">
+              <div class="form-section">
+                <h5 class="text-warning mb-4">Foosball</h5>
+                <div class="mb-3">
+                  <label class="form-label text-warning">Hourly Rate (₹)</label>
+                  <input type="number" class="form-control bg-dark border-warning text-white" id="foosballPrice" value="150">
+                </div>
+                <div class="mb-3">
+                  <label class="form-label text-warning">First Booking Discount (₹)</label>
+                  <input type="number" class="form-control bg-dark border-warning text-white" id="foosballDiscount" value="25">
+                </div>
+                <button class="btn btn-warning w-100" onclick="updatePricing('foosball')">
+                  Update Foosball Pricing
+                </button>
+              </div>
+            </div>
+          </div>
+        </div>
+
+        <!-- Customers Section -->
+        <div class="dashboard-content" id="customers">
+          <h2 class="text-warning mb-4">
+            <i class="fas fa-users me-2"></i> Customers
+          </h2>
+
+          <div class="card bg-dark border-warning">
+            <div class="card-header bg-black border-warning">
+              <div class="d-flex justify-content-between align-items-center">
+                <h5 class="text-warning mb-0">All Customers</h5>
+                <input type="text" class="form-control bg-dark border-warning text-white" placeholder="Search..." id="customerSearch" style="max-width: 200px;" onkeyup="filterCustomers()">
+              </div>
+            </div>
+            <div class="card-body">
+              <div class="table-wrapper">
+                <table class="table admin-table">
+                  <thead>
+                    <tr>
+                      <th>Name</th>
+                      <th>Email</th>
+                      <th>Phone</th>
+                      <th>Total Bookings</th>
+                      <th>Total Spent</th>
+                      <th>Joined</th>
+                    </tr>
+                  </thead>
+                  <tbody id="customersTable">
+                    <tr><td colspan="6" class="text-center text-muted">Loading...</td></tr>
+                  </tbody>
+                </table>
+              </div>
+            </div>
+          </div>
+        </div>
+
+        <!-- Revenue Section -->
+        <div class="dashboard-content" id="revenue">
+          <h2 class="text-warning mb-4">
+            <i class="fas fa-money-bill me-2"></i> Revenue Reports
+          </h2>
+
+          <div class="row g-4 mb-4">
+            <div class="col-md-4">
+              <div class="stat-card">
+                <i class="fas fa-calendar-day fa-2x text-warning"></i>
+                <div class="stat-label">Today</div>
+                <div class="stat-value" id="revToday">₹0</div>
+              </div>
+            </div>
+            <div class="col-md-4">
+              <div class="stat-card">
+                <i class="fas fa-calendar-week fa-2x text-warning"></i>
+                <div class="stat-label">This Week</div>
+                <div class="stat-value" id="revWeek">₹0</div>
+              </div>
+            </div>
+            <div class="col-md-4">
+              <div class="stat-card">
+                <i class="fas fa-calendar-alt fa-2x text-warning"></i>
+                <div class="stat-label">This Month</div>
+                <div class="stat-value" id="revMonth">₹0</div>
+              </div>
+            </div>
+          </div>
+
+          <div class="card bg-dark border-warning">
+            <div class="card-header bg-black border-warning">
+              <h5 class="text-warning mb-0">Revenue by Game</h5>
+            </div>
+            <div class="card-body">
+              <div class="table-wrapper">
+                <table class="table admin-table">
+                  <thead>
+                    <tr>
+                      <th>Game</th>
+                      <th>Total Bookings</th>
+                      <th>Total Revenue</th>
+                      <th>Average per Booking</th>
+                    </tr>
+                  </thead>
+                  <tbody id="revenueTable">
+                    <tr><td colspan="4" class="text-center text-muted">Loading...</td></tr>
+                  </tbody>
+                </table>
+              </div>
+            </div>
+          </div>
+        </div>
+
+        <!-- Settings Section -->
+        <div class="dashboard-content" id="settings">
+          <h2 class="text-warning mb-4">
+            <i class="fas fa-cog me-2"></i> Settings
+          </h2>
+
+          <div class="form-section">
+            <h5 class="text-warning mb-4">Venue Information</h5>
+            <div class="mb-3">
+              <label class="form-label text-warning">Venue Name</label>
+              <input type="text" class="form-control bg-dark border-warning text-white" value="Cue Stories" disabled>
+            </div>
+            <div class="mb-3">
+              <label class="form-label text-warning">Email</label>
+              <input type="email" class="form-control bg-dark border-warning text-white" id="venueEmail" value="info@cuestories.com">
+            </div>
+            <div class="mb-3">
+              <label class="form-label text-warning">Phone</label>
+              <input type="tel" class="form-control bg-dark border-warning text-white" id="venuePhone" value="8408068388">
+            </div>
+            <div class="mb-3">
+              <label class="form-label text-warning">Location</label>
+              <input type="text" class="form-control bg-dark border-warning text-white" id="venueLocation" value="Akluj">
+            </div>
+            <div class="mb-3">
+              <label class="form-label text-warning">About</label>
+              <textarea class="form-control bg-dark border-warning text-white" rows="3" id="venueAbout"></textarea>
+            </div>
+            <button class="btn btn-warning" onclick="updateVenueInfo()">
+              Save Changes
+            </button>
+          </div>
+
+          <div class="form-section">
+            <h5 class="text-warning mb-4">Operating Hours</h5>
+            <div class="row g-3">
+              <div class="col-md-6">
+                <label class="form-label text-warning">Opening Time</label>
+                <input type="time" class="form-control bg-dark border-warning text-white" id="openingTime" value="09:00">
+              </div>
+              <div class="col-md-6">
+                <label class="form-label text-warning">Closing Time</label>
+                <input type="time" class="form-control bg-dark border-warning text-white" id="closingTime" value="23:00">
+              </div>
+            </div>
+            <button class="btn btn-warning mt-3" onclick="updateOperatingHours()">
+              Update Hours
+            </button>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.bundle.min.js"></script>
+  <script>
+    // Fallback: force close offcanvas if data-bs-dismiss doesn't work
+    document.addEventListener('DOMContentLoaded', function() {
+      var closeBtn = document.querySelector('.offcanvas-header .btn-close');
+      var offcanvasEl = document.getElementById('adminSidebar');
+      if (closeBtn && offcanvasEl) {
+        closeBtn.addEventListener('click', function() {
+          if (typeof bootstrap !== 'undefined' && bootstrap.Offcanvas) {
+            var offcanvas = bootstrap.Offcanvas.getOrCreateInstance(offcanvasEl);
+            offcanvas.hide();
+          } else {
+            // fallback: hide manually
+            offcanvasEl.classList.remove('show');
+            offcanvasEl.style.visibility = 'hidden';
+          }
+        });
+      }
+    });
+  </script>
+  <script>
+    // Inline Supabase config for direct file access
+    const SUPABASE_URL = 'https://dtmjfodtpbjutrebgzzl.supabase.co';
+    const SUPABASE_ANON_KEY = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6ImR0bWpmb2R0cGJqdXRyZWJnenpsIiwicm9sZSI6ImFub24iLCJpYXQiOjE3NjkzMzQ3MzcsImV4cCI6MjA4NDkxMDczN30.r5NooTQnkfDa5kj4NSsNzgUZlTdyxnaY2bH9CaegyK0';
+    
+    // Get current user from localStorage
+    function getCurrentUser() {
+      const userData = localStorage.getItem('cue_user');
+      return userData ? JSON.parse(userData) : null;
+    }
+  </script>
+  <script>
+    let allBookings = [];
+    let allCustomers = [];
+    let allGames = {}; // Cache for game names
+
+    document.addEventListener('DOMContentLoaded', async () => {
+      // Check if user is admin
+      const user = getCurrentUser();
+      console.log('Admin check - User:', user);
+      if (!user || !user.is_admin) {
+        alert('Access denied. Admin only.');
+        window.location.href = '../index.html';
+        return;
+      }
+
+      // Load games first for name lookup
+      await loadGames();
+      
+      // Load dashboard data
+      await loadDashboardData();
+      await loadAllBookings();
+      await loadAllCustomers();
+      await loadRevenueData();
+    });
+
+    async function loadGames() {
+      try {
+        const response = await fetch(
+          `${SUPABASE_URL}/rest/v1/games?select=*`,
+          {
+            headers: {
+              'Authorization': `Bearer ${SUPABASE_ANON_KEY}`,
+              'apikey': SUPABASE_ANON_KEY,
+            },
+          }
+        );
+        const games = await response.json();
+        games.forEach(g => {
+          allGames[g.id] = g.name;
+        });
+        console.log('Games loaded:', allGames);
+      } catch (error) {
+        console.error('Error loading games:', error);
+      }
+    }
+
+    function switchSection(section) {
+      // Hide all sections
+      document.querySelectorAll('.dashboard-content').forEach(s => {
+        s.classList.remove('active');
+      });
+      document.querySelectorAll('.sidebar-item').forEach(item => {
+        item.classList.remove('active');
+      });
+
+      // Show selected section
+      document.getElementById(section).classList.add('active');
+      event.target.closest('.sidebar-item')?.classList.add('active');
+    }
+
+    async function loadDashboardData() {
+      try {
+        // Fetch today's bookings
+        const today = new Date().toISOString().split('T')[0];
+        const todayResponse = await fetch(
+          `${SUPABASE_URL}/rest/v1/bookings?booking_date=eq.${today}&status=eq.confirmed`,
+          {
+            headers: {
+              'Authorization': `Bearer ${SUPABASE_ANON_KEY}`,
+              'apikey': SUPABASE_ANON_KEY,
+            },
+          }
+        );
+
+        const todayBookings = await todayResponse.json();
+        document.getElementById('todayBookings').textContent = todayBookings.length;
+        
+        const todayRevenue = todayBookings.reduce((sum, b) => sum + parseFloat(b.total_price || 0), 0);
+        document.getElementById('todayRevenue').textContent = `₹${todayRevenue}`;
+
+        // Fetch ALL recent bookings (not just today)
+        const recentResponse = await fetch(
+          `${SUPABASE_URL}/rest/v1/bookings?order=created_at.desc&limit=10`,
+          {
+            headers: {
+              'Authorization': `Bearer ${SUPABASE_ANON_KEY}`,
+              'apikey': SUPABASE_ANON_KEY,
+            },
+          }
+        );
+        const recentBookings = await recentResponse.json();
+        console.log('Recent bookings:', recentBookings);
+
+        // Fetch users for name lookup
+        const usersResponse = await fetch(
+          `${SUPABASE_URL}/rest/v1/users?select=id,name,email`,
+          {
+            headers: {
+              'Authorization': `Bearer ${SUPABASE_ANON_KEY}`,
+              'apikey': SUPABASE_ANON_KEY,
+            },
+          }
+        );
+        const users = await usersResponse.json();
+        const userMap = {};
+        users.forEach(u => {
+          userMap[u.id] = u.name || u.email?.split('@')[0] || 'Unknown';
+        });
+
+        // Populate recent bookings table
+        const tbody = document.getElementById('recentBookingsTable');
+        tbody.innerHTML = '';
+        
+        if (recentBookings.length === 0) {
+          tbody.innerHTML = '<tr><td colspan="6" class="text-center" style="color: #aaa;">No bookings found</td></tr>';
+        } else {
+          recentBookings.slice(0, 5).forEach(booking => {
+            const customerName = userMap[booking.user_id] || 'Unknown';
+            const gameName = allGames[booking.game_id] || 'Game';
+            const row = tbody.insertRow();
+            row.innerHTML = `
+              <td>${booking.id.substring(0, 8)}</td>
+              <td>${customerName}</td>
+              <td>${gameName}</td>
+              <td>${booking.booking_date} ${booking.start_time}</td>
+              <td>₹${booking.total_price || 0}</td>
+              <td><span class="status-badge status-${booking.status}">${booking.status}</span></td>
+            `;
+          });
+        }
+      } catch (error) {
+        console.error('Error loading dashboard:', error);
+        document.getElementById('recentBookingsTable').innerHTML = 
+          '<tr><td colspan="6" class="text-center text-danger">Error loading bookings</td></tr>';
+      }
+    }
+
+    async function loadAllBookings() {
+      try {
+        // Fetch bookings
+        const response = await fetch(
+          `${SUPABASE_URL}/rest/v1/bookings?order=created_at.desc`,
+          {
+            headers: {
+              'Authorization': `Bearer ${SUPABASE_ANON_KEY}`,
+              'apikey': SUPABASE_ANON_KEY,
+            },
+          }
+        );
+
+        allBookings = await response.json();
+        console.log('All bookings loaded:', allBookings);
+
+        // Fetch users for name lookup
+        const usersResponse = await fetch(
+          `${SUPABASE_URL}/rest/v1/users?select=id,name,email`,
+          {
+            headers: {
+              'Authorization': `Bearer ${SUPABASE_ANON_KEY}`,
+              'apikey': SUPABASE_ANON_KEY,
+            },
+          }
+        );
+        const users = await usersResponse.json();
+        const userMap = {};
+        users.forEach(u => {
+          userMap[u.id] = u.name || u.email?.split('@')[0] || 'Unknown';
+        });
+
+        displayBookingsTable(allBookings, userMap);
+      } catch (error) {
+        console.error('Error loading bookings:', error);
+      }
+    }
+
+    function displayBookingsTable(bookings, userMap = {}) {
+      const tbody = document.getElementById('bookingsTable');
+      tbody.innerHTML = '';
+
+      if (bookings.length === 0) {
+        tbody.innerHTML = '<tr><td colspan="8" class="text-center" style="color: #aaa;">No bookings found</td></tr>';
+        return;
+      }
+
+      bookings.forEach(booking => {
+        const customerName = userMap[booking.user_id] || 'Unknown';
+        const gameName = allGames[booking.game_id] || 'Game';
+        const row = tbody.insertRow();
+        row.innerHTML = `
+          <td>${booking.id.substring(0, 8)}</td>
+          <td>${customerName}</td>
+          <td>${gameName}</td>
+          <td>${booking.booking_date}</td>
+          <td>${booking.start_time}</td>
+          <td>₹${booking.total_price || 0}</td>
+          <td><span class="status-badge status-${booking.status}">${booking.status}</span></td>
+          <td>
+            ${booking.status === 'confirmed' ? `
+              <button class="btn btn-sm btn-outline-danger action-btn" onclick="approveBooking('${booking.id}')">
+                Approve
+              </button>
+            ` : ''}
+            <button class="btn btn-sm btn-outline-danger action-btn" onclick="cancelBookingAdmin('${booking.id}')">
+              Cancel
+            </button>
+          </td>
+        `;
+      });
+    }
+
+    function filterBookings() {
+      const date = document.getElementById('bookingFilter').value;
+      if (!date) {
+        displayBookingsTable(allBookings);
+        return;
+      }
+
+      const filtered = allBookings.filter(b => b.booking_date === date);
+      displayBookingsTable(filtered);
+    }
+
+    async function blockSlot() {
+      const date = document.getElementById('blockDate').value;
+      const startTime = document.getElementById('blockStartTime').value;
+      const endTime = document.getElementById('blockEndTime').value;
+
+      if (!date || !startTime || !endTime) {
+        alert('Please fill all fields');
+        return;
+      }
+      try {
+        const response = await fetch(`${SUPABASE_URL}/rest/v1/blocked_slots`, {
+          method: 'POST',
+          headers: {
+            'Content-Type': 'application/json',
+            'Authorization': `Bearer ${SUPABASE_ANON_KEY}`,
+            'apikey': SUPABASE_ANON_KEY,
+          },
+          body: JSON.stringify({
+            blocked_date: date,
+            start_time: startTime,
+            end_time: endTime,
+            reason: '' // Add a reason if you have a field for it
+          }),
+        });
+        if (response.ok) {
+          alert('Slot blocked successfully');
+          document.getElementById('blockDate').value = '';
+          document.getElementById('blockStartTime').value = '';
+          document.getElementById('blockEndTime').value = '';
+          loadBlockedSlots();
+        } else {
+          throw new Error('Failed to block slot');
+        }
+      } catch (error) {
+        alert('Error blocking slot: ' + error.message);
+        console.error('Error blocking slot:', error);
+      }
+    }
+
+    async function deleteBlockedSlot(id) {
+      if (!confirm('Delete this blocked slot?')) return;
+      try {
+        const response = await fetch(
+          `${SUPABASE_URL}/rest/v1/blocked_slots?id=eq.${id}`,
+          {
+            method: 'DELETE',
+            headers: {
+              'Authorization': `Bearer ${SUPABASE_ANON_KEY}`,
+              'apikey': SUPABASE_ANON_KEY,
+            },
+          }
+        );
+        if (response.ok) {
+          loadBlockedSlots();
+        } else {
+          throw new Error('Failed to delete slot');
+        }
+      } catch (error) {
+        alert('Error deleting slot: ' + error.message);
+        console.error('Error deleting slot:', error);
+      }
+    }
+
+    async function updatePricing(game) {
+      const priceId = `${game}Price`;
+      const discountId = `${game}Discount`;
+      const price = document.getElementById(priceId).value;
+      const discount = document.getElementById(discountId).value;
+      let gameId = null;
+      for (const [id, name] of Object.entries(allGames)) {
+        if (name.toLowerCase() === game.toLowerCase()) {
+          gameId = id;
+          break;
+        }
+      }
+      if (!gameId) {
+        alert('Game not found!');
+        return;
+      }
+      try {
+        const response = await fetch(
+          `${SUPABASE_URL}/rest/v1/games?id=eq.${gameId}`,
+          {
+            method: 'PATCH',
+            headers: {
+              'Authorization': `Bearer ${SUPABASE_ANON_KEY}`,
+              'apikey': SUPABASE_ANON_KEY,
+              'Content-Type': 'application/json',
+              'Prefer': 'return=minimal'
+            },
+            body: JSON.stringify({
+              price_per_hour: Number(price),
+              first_booking_discount: Number(discount)
+            })
+          }
+        );
+        if (response.ok) {
+          alert(`${game} pricing updated successfully!`);
+        } else {
+          throw new Error('Failed to update pricing');
+        }
+      } catch (error) {
+        alert('Error updating pricing: ' + error.message);
+        console.error('Error updating pricing:', error);
+      }
+    }
+
+    async function approveBooking(bookingId) {
+      if (!confirm('Approve this booking?')) return;
+      
+      try {
+        const response = await fetch(
+          `${SUPABASE_URL}/rest/v1/bookings?id=eq.${bookingId}`,
+          {
+            method: 'PATCH',
+            headers: {
+              'Authorization': `Bearer ${SUPABASE_ANON_KEY}`,
+              'apikey': SUPABASE_ANON_KEY,
+              'Content-Type': 'application/json',
+              'Prefer': 'return=minimal'
+            },
+            body: JSON.stringify({ status: 'approved' })
+          }
+        );
+        
+        if (response.ok) {
+          alert('Booking approved successfully!');
+          await loadDashboardData();
+          await loadAllBookings();
+        } else {
+          throw new Error('Failed to approve booking');
+        }
+      } catch (error) {
+        console.error('Error approving booking:', error);
+        alert('Error approving booking: ' + error.message);
+      }
+    }
+
+    async function cancelBookingAdmin(bookingId) {
+      if (!confirm('Cancel this booking?')) return;
+      
+      try {
+        const response = await fetch(
+          `${SUPABASE_URL}/rest/v1/bookings?id=eq.${bookingId}`,
+          {
+            method: 'PATCH',
+            headers: {
+              'Authorization': `Bearer ${SUPABASE_ANON_KEY}`,
+              'apikey': SUPABASE_ANON_KEY,
+              'Content-Type': 'application/json',
+              'Prefer': 'return=minimal'
+            },
+            body: JSON.stringify({ status: 'cancelled' })
+          }
+        );
+        
+        if (response.ok) {
+          alert('Booking cancelled successfully!');
+          await loadDashboardData();
+          await loadAllBookings();
+        } else {
+          throw new Error('Failed to cancel booking');
+        }
+      } catch (error) {
+        console.error('Error cancelling booking:', error);
+        alert('Error cancelling booking: ' + error.message);
+      }
+    }
+
+    async function loadAllCustomers() {
+      try {
+        const response = await fetch(
+          `${SUPABASE_URL}/rest/v1/users`,
+          {
+            headers: {
+              'Authorization': `Bearer ${SUPABASE_ANON_KEY}`,
+              'apikey': SUPABASE_ANON_KEY,
+            },
+          }
+        );
+
+        allCustomers = await response.json();
+        displayCustomersTable(allCustomers);
+      } catch (error) {
+        console.error('Error loading customers:', error);
+      }
+    }
+
+    function displayCustomersTable(customers) {
+      const tbody = document.getElementById('customersTable');
+      tbody.innerHTML = '';
+
+      if (customers.length === 0) {
+        tbody.innerHTML = '<tr><td colspan="6" class="text-center text-muted">No customers found</td></tr>';
+        return;
+      }
+
+      customers.forEach(customer => {
+        const row = tbody.insertRow();
+        row.innerHTML = `
+          <td>${customer.name}</td>
+          <td>${customer.email || '-'}</td>
+          <td>${customer.phone || '-'}</td>
+          <td>5</td>
+          <td>₹750</td>
+          <td>${new Date(customer.created_at).toLocaleDateString()}</td>
+        `;
+      });
+    }
+
+    function filterCustomers() {
+      const search = document.getElementById('customerSearch').value.toLowerCase();
+      const filtered = allCustomers.filter(c => 
+        c.name.toLowerCase().includes(search) || 
+        (c.email && c.email.toLowerCase().includes(search))
+      );
+      displayCustomersTable(filtered);
+    }
+
+    async function loadRevenueData() {
+      try {
+        const response = await fetch(
+          `${SUPABASE_URL}/rest/v1/bookings?status=eq.confirmed`,
+          {
+            headers: {
+              'Authorization': `Bearer ${SUPABASE_ANON_KEY}`,
+              'apikey': SUPABASE_ANON_KEY,
+            },
+          }
+        );
+
+        const bookings = await response.json();
+        
+        // Calculate revenue by period
+        const today = new Date().toISOString().split('T')[0];
+        const todayRevenue = bookings
+          .filter(b => b.booking_date === today)
+          .reduce((sum, b) => sum + parseFloat(b.total_price), 0);
+
+        document.getElementById('revToday').textContent = `₹${todayRevenue}`;
+        document.getElementById('revWeek').textContent = '₹2500';
+        document.getElementById('revMonth').textContent = '₹15000';
+
+        // Revenue by game
+        const tbody = document.getElementById('revenueTable');
+        tbody.innerHTML = `
+          <tr>
+            <td>Snooker</td>
+            <td>45</td>
+            <td>₹6750</td>
+            <td>₹150</td>
+          </tr>
+          <tr>
+            <td>Foosball</td>
+            <td>38</td>
+            <td>₹5700</td>
+            <td>₹150</td>
+          </tr>
+        `;
+      } catch (error) {
+        console.error('Error loading revenue:', error);
+      }
+    }
+
+    async function updateVenueInfo() {
+      authManager.showNotification('Venue information updated', 'success');
+    }
+
+    async function updateOperatingHours() {
+      authManager.showNotification('Operating hours updated', 'success');
+    }
+
+    function adminLogout() {
+      // Fallback: always clear localStorage and redirect
+      try {
+        if (typeof authManager !== 'undefined' && authManager.logout) {
+          authManager.logout();
+        } else {
+          localStorage.removeItem('cue_user');
+          window.location.href = '../index.html';
+        }
+      } catch (e) {
+        localStorage.removeItem('cue_user');
+        window.location.href = '../index.html';
+      }
+    }
+  </script>
+</body>
+</html>
