@@ -4,7 +4,7 @@ const SUPABASE_ANON_KEY = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBh
 const BACKEND_API = 'https://cue-cafe.onrender.com';
 
 // Live Razorpay Key
-const RAZORPAY_KEY = 'rzp_live_S9cCYCCuhD91m2';
+const RAZORPAY_KEY = 'rzp_live_S9cCYCCuhD91m2'; 
 
 // Declare authManager, Razorpay, and bookingManager variables
 const authManager = {
