@@ -5,7 +5,7 @@ const BACKEND_API = 'https://cue-cafe.onrender.com';
 
 // Live Razorpay Key
 const RAZORPAY_KEY = 'rzp_live_S9cCYCCuhD91m2'; 
-
+//live key added successfully
 // Declare authManager, Razorpay, and bookingManager variables
 const authManager = {
   isLoggedIn: () => true,
