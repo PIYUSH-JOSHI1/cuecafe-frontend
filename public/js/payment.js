@@ -3,9 +3,8 @@ const SUPABASE_URL = 'https://dtmjfodtpbjutrebgzzl.supabase.co';
 const SUPABASE_ANON_KEY = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6ImR0bWpmb2R0cGJqdXRyZWJnenpsIiwicm9sZSI6ImFub24iLCJpYXQiOjE3NjkzMzQ3MzcsImV4cCI6MjA4NDkxMDczN30.r5NooTQnkfDa5kj4NSsNzgUZlTdyxnaY2bH9CaegyK0';
 const BACKEND_API = 'https://cue-cafe.onrender.com';
 
-// Test Razorpay Keys
-const RAZORPAY_TEST_KEY = 'rzp_live_S9cCYCCuhD91m2';
-const RAZORPAY_TEST_SECRET = 'Y4FpZJXI6el92elKndql7rJm';
+// Live Razorpay Key
+const RAZORPAY_KEY = 'rzp_live_S9cCYCCuhD91m2';
 
 // Declare authManager, Razorpay, and bookingManager variables
 const authManager = {
@@ -44,7 +43,7 @@ class PaymentManager {
     try {
       // Step 1: Call backend to create Razorpay order
       console.log('[v0] Creating Razorpay order via backend');
-      const orderResponse = await fetch(`${BACKEND_API}/razorpay/create-order`, {
+      const orderResponse = await fetch(`${BACKEND_API}/api/razorpay/create-order`, {
         method: 'POST',
         headers: {
           'Content-Type': 'application/json',
@@ -69,7 +68,7 @@ class PaymentManager {
 
       // Step 2: Open Razorpay checkout
       const options = {
-        key: RAZORPAY_TEST_KEY,
+        key: RAZORPAY_KEY,
         amount: Math.round(amount * 100),
         currency: 'INR',
         order_id: orderData.order_id,
@@ -112,7 +111,7 @@ class PaymentManager {
     try {
       // Step 1: Verify payment with backend
       console.log('[v0] Verifying payment with backend');
-      const verifyResponse = await fetch(`${BACKEND_API}/razorpay/verify-payment`, {
+      const verifyResponse = await fetch(`${BACKEND_API}/api/razorpay/verify-payment`, {
         method: 'POST',
         headers: {
           'Content-Type': 'application/json',
@@ -174,7 +173,7 @@ class PaymentManager {
   async sendConfirmationEmail(bookingId) {
     console.log('[v0] Sending confirmation email for booking:', bookingId);
     try {
-      const response = await fetch(`${BACKEND_API}/bookings/${bookingId}/send-confirmation`, {
+      const response = await fetch(`${BACKEND_API}/api/bookings/${bookingId}/send-confirmation`, {
         method: 'POST',
         headers: {
           'Content-Type': 'application/json',
@@ -194,7 +193,7 @@ class PaymentManager {
     console.log('[v0] Initiating refund for booking:', bookingId);
 
     try {
-      const response = await fetch(`${BACKEND_API}/razorpay/refund`, {
+      const response = await fetch(`${BACKEND_API}/api/razorpay/refund`, {
         method: 'POST',
         headers: {
           'Content-Type': 'application/json',
