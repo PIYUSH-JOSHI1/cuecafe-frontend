@@ -1,7 +1,7 @@
 // Booking Manager - Fixed Version
 const SUPABASE_URL = 'https://dtmjfodtpbjutrebgzzl.supabase.co';
 const SUPABASE_ANON_KEY = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6ImR0bWpmb2R0cGJqdXRyZWJnenpsIiwicm9sZSI6ImFub24iLCJpYXQiOjE3NjkzMzQ3MzcsImV4cCI6MjA4NDkxMDczN30.r5NooTQnkfDa5kj4NSsNzgUZlTdyxnaY2bH9CaegyK0';
-const BACKEND_API = 'http://localhost:5000/api';
+const BACKEND_API = 'https://cue-cafe.onrender.com';
 
 // Note: authManager is defined in auth.js and must be loaded first
 
